@@ -31,6 +31,6 @@
     "eslint-config-next": "15.0.1"
   },
   "jest": {
-    "testEnvironment": "jsdom"
+    "verbose": true
   }
 }
