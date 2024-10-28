@@ -1,9 +1,11 @@
-"use client";
+import React from 'react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import RestaurantGrid from '../RestaurantGrid';
+import RestaurantCard from '../RestaurantCard';
 
-import { useState, useEffect } from 'react';
-import { Container, Button, TextField, Box, Grid } from '@mui/material';
-import RestaurantCard from "@/components/RestaurantGrid";
-import RestaurantGrid from '@/components/RestaurantGrid';
+jest.mock('../RestaurantCard', () => {
+  return jest.fn(({ name }) => <div>{name}</div>);
+});
 
 const staticRestaurants = [
   {
@@ -191,57 +193,45 @@ const staticRestaurants = [
       "tag": "Gift"
     },
 ];
-export default function Home() {
-  const [restaurants, setRestaurants] = useState(staticRestaurants);
-  // const [filteredRestaurants, setFilteredRestaurants] = useState();
-  // console.log("restaurant22",restaurants);
-  
 
-  // useEffect(() => {
-  //   // Fetch restaurant data on the client side
-  //   async function fetchRestaurants() {
-  //     try {
-  //       const res = await fetch('https://jsonplaceholder.typicode.com/posts');
-  //       console.log(res.data, "hamza")
-  //       const data = await res.json();
-  //       setRestaurants(data);
-  //       setFilteredRestaurants(data);
-  //     } catch (error) {
-  //       console.error('Error fetching data:', error);
-  //     }
-  //   }
+describe('RestaurantGrid Component', () => {
+  test('renders initial restaurants', () => {
+    render(<RestaurantGrid restaurants={staticRestaurants} />);
+    
+    expect(screen.getByText('Sushi Place')).toBeInTheDocument();
+    expect(screen.getByText('Pizza Place')).toBeInTheDocument();
+    expect(screen.getByText('Burger Place')).toBeInTheDocument();
+  });
 
-  //   fetchRestaurants();
-  // }, []);
+  test('filters restaurants by category', () => {
+    render(<RestaurantGrid restaurants={staticRestaurants} />);
+    
+    fireEvent.click(screen.getByText('Sushi'));
+    
+    expect(screen.getByText('Sushi Place')).toBeInTheDocument();
+    expect(screen.queryByText('Pizza Place')).not.toBeInTheDocument();
+    expect(screen.queryByText('Burger Place')).not.toBeInTheDocument();
+  });
 
+  test('loads more restaurants', () => {
+    render(<RestaurantGrid restaurants={staticRestaurants} />);
+    
+    const loadMoreButton = screen.getByText('Load More');
+    
+    fireEvent.click(loadMoreButton);
+    
+    expect(screen.getByText('Sushi Place')).toBeInTheDocument();
+    expect(screen.getByText('Pizza Place')).toBeInTheDocument();
+    expect(screen.getByText('Burger Place')).toBeInTheDocument();
+  });
 
-
-
-
-  return (
-    <Container maxWidth="lg" >
-    <RestaurantGrid restaurants={restaurants} />
-    </Container>
-
-  );
-}
-
-// export async function getServerSideProps() {
-//   try {
-//       const res = await fetch('https://api.example.com/restaurants'); // Replace with a valid JSON API endpoint
-//       const restaurants = await res.json();
-
-//       return {
-//           props: {
-//               restaurants,
-//           },
-//       };
-//   } catch (error) {
-//       console.error('Error fetching data:', error);
-//       return {
-//           props: {
-//               restaurants: [], // Fallback in case of error
-//           },
-//       };
-//   }
-// }
+  test('searches restaurants', () => {
+    render(<RestaurantGrid restaurants={staticRestaurants} />);
+    
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Sushi' } });
+    
+    expect(screen.getByText('Sushi Place')).toBeInTheDocument();
+    expect(screen.queryByText('Pizza Place')).not.toBeInTheDocument();
+    expect(screen.queryByText('Burger Place')).not.toBeInTheDocument();
+  });
+});
