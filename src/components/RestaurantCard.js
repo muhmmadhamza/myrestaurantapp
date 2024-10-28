@@ -1,5 +1,3 @@
-// RestaurantCard
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardMedia, Typography, Box, Chip, Button } from '@mui/material';
 import { styled } from '@mui/material/styles';
